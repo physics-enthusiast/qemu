@@ -518,7 +518,7 @@ static const ChardevClass *char_get_class(const char *driver, Error **errp)
 
     if (object_class_is_abstract(oc)) {
         error_setg(errp, QERR_INVALID_PARAMETER_VALUE, "driver",
-                   "an abstract device type");
+                   "a non-abstract device type");
         return NULL;
     }
 
@@ -804,6 +804,9 @@ QemuOptsList qemu_chardev_opts = {
             .type = QEMU_OPT_STRING,
         },{
             .name = "path",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "input-path",
             .type = QEMU_OPT_STRING,
         },{
             .name = "host",
@@ -1112,7 +1115,7 @@ ChardevReturn *qmp_chardev_change(const char *id, ChardevBackend *backend,
         return NULL;
     }
 
-    /* change successfull, clean up */
+    /* change successful, clean up */
     chr_new->handover_yank_instance = false;
 
     /*
@@ -1175,12 +1178,10 @@ bool qmp_add_client_char(int fd, bool has_skipauth, bool skipauth,
 
     if (!s) {
         error_setg(errp, "protocol '%s' is invalid", protocol);
-        close(fd);
         return false;
     }
     if (qemu_chr_add_client(s, fd) < 0) {
         error_setg(errp, "failed to add client");
-        close(fd);
         return false;
     }
     return true;

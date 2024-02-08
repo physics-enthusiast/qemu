@@ -26,9 +26,9 @@ chardev_ss.add(when: 'CONFIG_WIN32', if_true: files(
   'char-win.c',
 ))
 
-chardev_ss = chardev_ss.apply(config_host, strict: false)
+chardev_ss = chardev_ss.apply(config_targetos, strict: false)
 
-softmmu_ss.add(files(
+system_ss.add(files(
     'char-hmp-cmds.c',
     'msmouse.c',
     'wctablet.c',
