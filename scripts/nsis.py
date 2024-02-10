@@ -88,10 +88,26 @@ def main():
                 """.format(arch, desc))
 
         search_path = args.dlldir
-        print("Searching '%s' for the dependent dlls ..." % search_path)
         dlldir = os.path.join(destdir + prefix, "dll")
         os.mkdir(dlldir)
 
+        print("Searching '%s' for the dependent dlls ..." % destdir + prefix)
+        for exe in glob.glob(os.path.join(destdir + prefix, "*.exe")):
+            signcode(exe)
+
+            # find all dll dependencies
+            deps = set(find_deps(exe, destdir + prefix, set()))
+            deps.remove(exe)
+
+            # copy all dlls to the DLLDIR
+            for dep in deps:
+                dllfile = os.path.join(dlldir, os.path.basename(dep))
+                if (os.path.exists(dllfile)):
+                    continue
+                print("Copying '%s' to '%s'" % (dep, dllfile))
+                shutil.copy(dep, dllfile)
+
+        print("Searching '%s' for the dependent dlls ..." % search_path)
         for exe in glob.glob(os.path.join(destdir + prefix, "*.exe")):
             signcode(exe)
 
@@ -106,7 +122,7 @@ def main():
                     continue
                 print("Copying '%s' to '%s'" % (dep, dllfile))
                 shutil.copy(dep, dllfile)
-
+        
         makensis = [
             "makensis",
             "-V2",
